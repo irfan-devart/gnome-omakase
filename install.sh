@@ -78,6 +78,17 @@ if [[ $(gsettings get org.gnome.desktop.wm.keybindings close) != *"'<Super>w'"* 
   echo "  <Super>w  close window"
 fi
 
+# Workspaces on Super+Alt+number: Super+number stays with pinned apps and
+# Dash to Panel uses Super+Shift+number.
+for n in 1 2 3 4; do
+  current=$(gsettings get org.gnome.desktop.wm.keybindings "switch-to-workspace-$n")
+  if [[ $current != *"<Super><Alt>$n"* ]]; then
+    om_gset org.gnome.desktop.wm.keybindings "switch-to-workspace-$n" "['<Super><Alt>$n']"
+    om_gset org.gnome.desktop.wm.keybindings "move-to-workspace-$n" "['<Super><Alt><Shift>$n']"
+    echo "  <Super><Alt>$n  workspace $n (add Shift to move the window)"
+  fi
+done
+
 echo "== Shortcuts"
 bin="$HOME/.local/bin"
 om_kb_add launcher "Launcher" "$bin/launcher-toggle" "<Super>space"

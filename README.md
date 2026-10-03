@@ -16,6 +16,7 @@ Tested on Ubuntu 26.04, GNOME 50.
 | `Super+W` | Close window |
 | `Super+T`, then two tiles | Tile the window |
 | `Ctrl+Super+Arrow` | Focus the window on that side |
+| `Super+Alt+1-4` | Go to workspace (add `Shift` to take the window) |
 
 One theme switch covers GNOME, the terminal (Ptyxis), Herdr, Claude Code, the launcher, the tiling grid and the wallpaper. Themes: Tokyo Night, Gruvbox, Gruvbox Light.
 
