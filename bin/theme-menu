@@ -14,7 +14,7 @@ theme_args=()
 
 mkdir -p "$DK_STATE"
 choice=$(dk_theme_ids | rofi -x11 -normal-window -dpi 1 -dmenu -i -p "theme" \
-  -select "$current" "${theme_args[@]}" 2>> "$DK_STATE/menu.log")
+  -select "$current" "${theme_args[@]}" 2>> "$DK_STATE/menu.log") || true
 # rofi under XWayland can exit 1 even after a pick, so trust the output, not
 # the exit code. Esc prints nothing; theme-set validates whatever comes back.
 [[ -n $choice ]] || exit 0
