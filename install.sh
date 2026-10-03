@@ -66,6 +66,27 @@ for cmd in "$OM_ROOT"/bin/*; do
   echo "  $(basename "$cmd")"
 done
 
+echo "== Launcher entries"
+# Ptyxis' own entry only raises an open window, so picking Terminal in the
+# launcher seems to do nothing. A user-level copy opens a new window instead.
+# Marked so uninstall removes only our copy.
+ptyxis_desktop=/usr/share/applications/org.gnome.Ptyxis.desktop
+ptyxis_override="${XDG_DATA_HOME:-$HOME/.local/share}/applications/org.gnome.Ptyxis.desktop"
+if [[ -f $ptyxis_desktop ]]; then
+  if [[ -f $ptyxis_override ]] && ! grep -q '^# gnome-omakase' "$ptyxis_override"; then
+    echo "  skip Terminal: $ptyxis_override exists and isn't ours"
+  else
+    # shellcheck disable=SC2016 # awk program, not shell
+    om_rewrite "$ptyxis_override" awk '
+      NR == 1 { print "# gnome-omakase: opens a new window instead of raising the open one" }
+      /^\[/ { main = ($0 == "[Desktop Entry]") }
+      main && /^Exec=/ { print "Exec=ptyxis --new-window"; next }
+      main && /^DBusActivatable=/ { print "DBusActivatable=false"; next }
+      { print }' "$ptyxis_desktop"
+    echo "  Terminal opens a new window"
+  fi
+fi
+
 echo "== Window keys"
 # Super+Space becomes the launcher, so input-source switching moves over.
 if [[ $(gsettings get org.gnome.desktop.wm.keybindings switch-input-source) == *"'<Super>space'"* ]]; then

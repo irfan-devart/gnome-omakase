@@ -80,6 +80,11 @@ for link in "$HOME"/.local/bin/*; do
     echo "  removed $(basename "$link")"
   fi
 done
+ptyxis_override="${XDG_DATA_HOME:-$HOME/.local/share}/applications/org.gnome.Ptyxis.desktop"
+if [[ -f $ptyxis_override ]] && grep -q '^# gnome-omakase' "$ptyxis_override"; then
+  om_run rm "$ptyxis_override"
+  echo "  removed Terminal launcher override"
+fi
 while read -r id; do
   palette="${XDG_DATA_HOME:-$HOME/.local/share}/org.gnome.Ptyxis/palettes/omakase-$id.palette"
   if [[ -f $palette ]]; then
