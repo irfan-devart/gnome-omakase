@@ -40,7 +40,7 @@ apply_ptyxis() {
 }
 
 # Ghostty reads the colours from a file we own, pulled in by one line in the
-# user's config (see install.sh). Open windows update on Ctrl+Shift+,.
+# user's config (see install.sh).
 apply_ghostty() {
   local t=$1 i
   command -v ghostty > /dev/null || return 0
@@ -55,6 +55,12 @@ apply_ghostty() {
       echo "palette = $i=$(om_get "$t" "color$i")"
     done
   } | om_write "${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/omakase-theme"
+
+  # Ask running Ghostty windows to reload through its D-Bus action. If
+  # Ghostty isn't running there's nothing to reload, so failure is fine.
+  om_run gdbus call --session --dest com.mitchellh.ghostty \
+    --object-path /com/mitchellh/ghostty \
+    --method org.gtk.Actions.Activate reload-config "[]" "{}" > /dev/null 2>&1 || true
 }
 
 apply_herdr() {
