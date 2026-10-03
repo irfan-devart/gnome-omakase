@@ -12,7 +12,11 @@ current=$(cat "$DK_STATE/current" 2> /dev/null || true)
 theme_args=()
 [[ -f $DK_STATE/rofi.rasi ]] && theme_args=(-theme "$DK_STATE/rofi.rasi")
 
+mkdir -p "$DK_STATE"
 choice=$(dk_theme_ids | rofi -x11 -normal-window -dpi 1 -dmenu -i -p "theme" \
-  -select "$current" "${theme_args[@]}") || exit 0
+  -select "$current" "${theme_args[@]}" 2>> "$DK_STATE/menu.log")
+# rofi under XWayland can exit 1 even after a pick, so trust the output, not
+# the exit code. Esc prints nothing; theme-set validates whatever comes back.
+[[ -n $choice ]] || exit 0
 
-"$DK_ROOT/bin/theme-set" "$choice"
+"$DK_ROOT/bin/theme-set" "$choice" >> "$DK_STATE/menu.log" 2>&1
