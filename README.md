@@ -18,6 +18,8 @@ Tested on Ubuntu 26.04, GNOME 50.
 | `Ctrl+Super+Arrow` | Focus the window on that side |
 | `Super+Alt+1-4` | Go to workspace (add `Shift` to take the window) |
 
+The browser shortcut opens your default browser. Change it, and other default apps, in GNOME Settings > Apps > Default Apps.
+
 One theme switch covers GNOME, the terminal (Ptyxis), Herdr, Claude Code, the launcher, the tiling grid and the wallpaper. Themes: Tokyo Night, Gruvbox, Gruvbox Light.
 
 ## Install

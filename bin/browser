@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Open the default browser, as set in GNOME Settings > Apps > Default Apps.
+
+set -euo pipefail
+
+id=$(xdg-settings get default-web-browser 2> /dev/null || true)
+[[ $id =~ ^[A-Za-z0-9._-]+\.desktop$ ]] || exec xdg-open about:blank
+
+IFS=: read -ra dirs <<< "${XDG_DATA_HOME:-$HOME/.local/share}:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+for dir in "${dirs[@]}"; do
+  if [[ -f $dir/applications/$id ]]; then
+    exec gio launch "$dir/applications/$id"
+  fi
+done
+
+exec xdg-open about:blank

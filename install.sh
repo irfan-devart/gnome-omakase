@@ -120,12 +120,7 @@ for term in ptyxis gnome-terminal kgx; do
     break
   fi
 done
-for browser in google-chrome firefox chromium; do
-  if command -v "$browser" > /dev/null; then
-    om_kb_add browser "Browser" "$browser --new-window" "<Shift><Super>b"
-    break
-  fi
-done
+om_kb_add browser "Browser" "$bin/browser" "<Shift><Super>b"
 command -v nautilus > /dev/null && om_kb_add files "Files" "nautilus --new-window" "<Shift><Super>f"
 
 echo "== Extensions"
