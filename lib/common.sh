@@ -36,15 +36,15 @@ dk_write() {
   fi
   [[ -L $target ]] && target=$(readlink -f "$target")
   mkdir -p "$(dirname "$target")"
-  local tmp
-  tmp=$(mktemp "$target.XXXXXX")
-  cat > "$tmp"
-  if [[ ! -s $tmp ]]; then
-    rm -f "$tmp"
+  local staged
+  staged=$(mktemp "$target.XXXXXX")
+  cat > "$staged"
+  if [[ ! -s $staged ]]; then
+    rm -f "$staged"
     dk_die "refusing to write an empty $target"
   fi
-  [[ -f $target ]] && chmod --reference="$target" "$tmp"
-  mv "$tmp" "$target"
+  [[ -f $target ]] && chmod --reference="$target" "$staged"
+  mv "$staged" "$target"
 }
 
 # Run a command that prints a file's new content, and write it only if the
@@ -123,7 +123,7 @@ dk_theme_ids() {
 # because they end up in gsettings, sed and config files.
 dk_get() {
   local file=$1 key=$2 value
-  value=$(sed -n -E "s/^$key[[:space:]]*=[[:space:]]*\"([^\"]*)\"[[:space:]]*$/\1/p" "$file" | head -1)
+  value=$(sed -n -E "s/^${key}[[:space:]]*=[[:space:]]*\"([^\"]*)\"[[:space:]]*$/\1/p" "$file" | head -1)
   [[ -n $value ]] || dk_die "$file: missing '$key'"
 
   case $key in

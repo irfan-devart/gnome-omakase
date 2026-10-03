@@ -115,7 +115,9 @@ done
 for file in "$DK_ROOT"/defaults/*.dconf; do
   name=$(basename "$file" .dconf)
   ext=$(printf '%s\n' "${EXTENSIONS[@]}" | grep "^$name@" || true)
-  [[ -n $ext ]] && gnome-extensions info "$ext" > /dev/null 2>&1 || continue
+  if [[ -z $ext ]] || ! gnome-extensions info "$ext" > /dev/null 2>&1; then
+    continue
+  fi
   while IFS='=' read -r key value; do
     [[ $key =~ ^[a-z0-9-]+$ ]] || continue
     dk_dset "/org/gnome/shell/extensions/$name/$key" "$value"

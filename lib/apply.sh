@@ -62,6 +62,7 @@ dk_herdr_set_name() {
   # Set name = "..." inside the [theme] table only: replace it if present,
   # else add it under the header. Without a [theme] table, append one.
   if grep -qE '^\[theme\][[:space:]]*(#.*)?$' "$config"; then
+    # shellcheck disable=SC2016 # awk program, not shell
     DK_NAME="$name" dk_rewrite "$config" awk '
       BEGIN { name = ENVIRON["DK_NAME"] }
       /^\[/ { in_theme = ($0 ~ /^\[theme\][[:space:]]*(#.*)?$/) }
@@ -96,6 +97,7 @@ apply_claude() {
   old=$(jq -r 'if (.theme | type) == "string" then .theme else "" end' "$settings")
   [[ $old =~ ^[a-z0-9-]{0,40}$ ]] || old=""
   dk_remember claude "$settings" theme "$old"
+  # shellcheck disable=SC2016 # jq variable, not shell
   dk_rewrite "$settings" jq --arg theme "$value" '.theme = $theme' "$settings"
 }
 

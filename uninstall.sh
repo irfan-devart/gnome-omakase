@@ -41,6 +41,7 @@ if [[ -f $DK_PRIOR ]]; then
           if [[ -n $value ]]; then
             dk_herdr_set_name "$where" "$value"
           else
+            # shellcheck disable=SC2016 # awk program, not shell
             dk_rewrite "$where" awk '
               /^\[/ { in_theme = ($0 ~ /^\[theme\]/) }
               in_theme && /^name[[:space:]]*=/ { next }
@@ -52,6 +53,7 @@ if [[ -f $DK_PRIOR ]]; then
           if [[ -z $value ]]; then
             dk_rewrite "$where" jq 'del(.theme)' "$where"
           else
+            # shellcheck disable=SC2016 # jq variable, not shell
             dk_rewrite "$where" jq --arg theme "$value" '.theme = $theme' "$where"
           fi ;;
       esac

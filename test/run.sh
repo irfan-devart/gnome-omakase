@@ -36,6 +36,7 @@ for tool in gsettings dconf; do
   real=$(command -v "$tool" || true)
   {
     echo '#!/bin/bash'
+    # shellcheck disable=SC2016 # literal text of the shim script
     echo 'case $1 in'
     echo "  get | list-keys | list-recursively | read | dump | list) exec \"$real\" \"\$@\" ;;"
     echo "  *) echo \"test guard: blocked $tool \$1\" >&2; exit 99 ;;"
@@ -50,7 +51,7 @@ for f in "$root"/bin/* "$root"/lib/*.sh "$root"/*.sh "$root"/test/*.sh; do
 done
 
 if command -v shellcheck > /dev/null; then
-  check "shellcheck" shellcheck -x -e SC1091 "$root"/bin/* "$root"/*.sh "$root"/test/*.sh
+  check "shellcheck" shellcheck -x -s bash -e SC1091 "$root"/bin/* "$root"/lib/*.sh "$root"/*.sh "$root"/test/*.sh
 else
   echo "skip  shellcheck (not installed)"
 fi
@@ -76,6 +77,7 @@ herdr_case() {
   (
     source "$root/lib/common.sh"
     source "$root/lib/apply.sh"
+    # shellcheck disable=SC2329 # stub called by the code under test
     herdr() { :; }
     dk_herdr_set_name "$tmp/herdr.toml" "tokyo-night"
   )
