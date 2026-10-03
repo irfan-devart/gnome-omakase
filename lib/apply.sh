@@ -139,8 +139,8 @@ apply_tactile() {
   om_dset /org/gnome/shell/extensions/tactile/text-color "'rgba($r,$g,$b,1.0)'"
 }
 
-# Wallpaper: the first image in the user's folder for this theme, else one
-# generated from the palette. Only plain file names are used, so the URI
+# Wallpaper: the first image in the user's folder for this theme, else the
+# theme's own background file, else one generated from the palette. Only plain file names are used, so the URI
 # needs no escaping.
 apply_wallpaper() {
   local t=$1 id=$2 image="" file uri
@@ -151,6 +151,13 @@ apply_wallpaper() {
     image=$file
     break
   done
+
+  # A theme can ship its own background next to theme.toml.
+  if [[ -z $image ]]; then
+    for file in "$(dirname "$t")"/background.{svg,jpg,png}; do
+      [[ -f $file ]] && image=$file && break
+    done
+  fi
 
   if [[ -z $image ]]; then
     image="$OM_STATE/wallpapers/$id.svg"

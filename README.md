@@ -20,7 +20,7 @@ Tested on Ubuntu 26.04, GNOME 50.
 
 The browser shortcut opens your default browser. Change it, and other default apps, in GNOME Settings > Apps > Default Apps.
 
-One theme switch covers GNOME, the terminal (Ghostty and Ptyxis), Herdr, Claude Code, the launcher, the tiling grid and the wallpaper. Eleven themes: Catppuccin Mocha and Latte, Tokyo Night, Kanagawa, Nord, Everforest, Rose Pine Dawn, Gruvbox and Gruvbox Light, Matte Black, White.
+One theme switch covers GNOME, the terminal (Ghostty and Ptyxis), Herdr, Claude Code, the launcher, the tiling grid and the wallpaper. Twelve themes: Paper (e-ink calm), Catppuccin Mocha and Latte, Tokyo Night, Kanagawa, Nord, Everforest, Rose Pine Dawn, Gruvbox and Gruvbox Light, Matte Black, White.
 
 ## Install
 
