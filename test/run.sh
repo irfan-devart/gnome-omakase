@@ -90,6 +90,29 @@ check "herdr adds name" herdr_case \
 check "herdr adds table" herdr_case \
   'onboarding = false\n' 'onboarding = false\n\n[theme]\nname = "tokyo-night"'
 
+herdr_custom_roundtrip() {
+  printf 'onboarding = false\n\n[theme]\nname = "x"\n' > "$tmp/hc.toml"
+  cp "$tmp/hc.toml" "$tmp/hc.orig"
+  (
+    source "$root/lib/common.sh"
+    source "$root/lib/apply.sh"
+    om_herdr_custom "$tmp/hc.toml" "$root/themes/paper/theme.toml"
+    om_herdr_custom "$tmp/hc.toml" "$root/themes/paper/theme.toml"
+    [[ $(grep -c '^\[theme\.custom\]' "$tmp/hc.toml") == 1 ]] || exit 1
+    om_herdr_custom "$tmp/hc.toml" ""
+  ) && cmp -s "$tmp/hc.toml" "$tmp/hc.orig"
+}
+check "herdr custom colours add, replace, remove" herdr_custom_roundtrip
+
+user_custom_kept() {
+  printf '[theme]\nname = "x"\n\n[theme.custom]\naccent = "#123456"\n' > "$tmp/hu.toml"
+  cp "$tmp/hu.toml" "$tmp/hu.orig"
+  ( source "$root/lib/common.sh"; source "$root/lib/apply.sh"
+    om_herdr_custom "$tmp/hu.toml" "$root/themes/paper/theme.toml" ) 2> /dev/null
+  cmp -s "$tmp/hu.toml" "$tmp/hu.orig"
+}
+check "herdr leaves user's own custom colours alone" user_custom_kept
+
 check "herdr header with comment" herdr_case \
   '[theme] # mine\nname = "x"\n' '[theme] # mine\nname = "tokyo-night"'
 

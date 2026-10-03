@@ -95,6 +95,7 @@ if command -v ghostty > /dev/null && ! grep -q '^# gnome-omakase start' "$ghostt
     [[ -f $ghostty_config ]] && cat "$ghostty_config"
     echo "# gnome-omakase start"
     echo "window-decoration = false"
+    echo "app-notifications = no-config-reload"
     echo "config-file = ?omakase-theme"
     echo "# gnome-omakase end"
   } | om_write "$ghostty_config"

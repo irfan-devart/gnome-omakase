@@ -38,6 +38,7 @@ if [[ -f $OM_PRIOR ]]; then
           fi ;;
         herdr)
           [[ -f $where ]] || exit 0
+          om_herdr_custom "$where" ""
           if [[ -n $value ]]; then
             om_herdr_set_name "$where" "$value"
           else

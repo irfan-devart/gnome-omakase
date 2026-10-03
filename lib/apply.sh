@@ -73,7 +73,51 @@ apply_herdr() {
   old=$(sed -n -E '/^\[theme\]/,/^\[/ s/^name[[:space:]]*=[[:space:]]*"([^"]*)".*/\1/p' "$config" | head -1)
   [[ $old =~ ^[a-z0-9-]{1,40}$ ]] || old=""
   om_remember herdr "$config" name "$old"
+  if [[ $(om_get "$t" herdr) == "terminal" ]]; then
+    om_herdr_custom "$config" "$t"
+  else
+    om_herdr_custom "$config" ""
+  fi
   om_herdr_set_name "$config" "$(om_get "$t" herdr)"
+}
+
+# Herdr's "terminal" theme guesses its UI colours from the terminal palette,
+# which can leave selected rows unreadable. Themes without a Herdr built-in
+# get an exact [theme.custom] table, marked as ours. A [theme.custom] the
+# user wrote is never touched; ours is replaced or removed on each switch.
+om_herdr_custom() {
+  local config=$1 t=$2
+  if grep -q '^\[theme\.custom\]' "$config" && ! grep -A1 '^\[theme\.custom\]' "$config" | grep -q '^# gnome-omakase'; then
+    echo "  skip Herdr colours: $config has its own [theme.custom]" >&2
+    return 0
+  fi
+
+  local body
+  # shellcheck disable=SC2016 # awk program, not shell
+  body=$(awk '
+    /^\[theme\.custom\]/ { getline next_line; if (next_line ~ /^# gnome-omakase/) { skip = 1; next } print; print next_line; next }
+    skip && /^\[/ { skip = 0 }
+    !skip { print }
+  ' "$config")
+  # Drop the blank lines our removed table leaves at the end.
+  body=$(printf '%s\n' "$body" | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}')
+
+  {
+    printf '%s\n' "$body"
+    if [[ -n $t ]]; then
+      echo
+      echo "[theme.custom]"
+      echo "# gnome-omakase: written by theme-set, replaced on every switch"
+      echo "text = \"$(om_get "$t" foreground)\""
+      echo "accent = \"$(om_get "$t" accent)\""
+      echo "panel_bg = \"$(om_get "$t" background)\""
+      echo "sidebar_bg = \"$(om_get "$t" background)\""
+      echo "active_row_bg = \"$(om_get "$t" selection_background)\""
+      echo "selection_bg = \"$(om_get "$t" selection_background)\""
+      echo "red = \"$(om_get "$t" color1)\""
+      echo "green = \"$(om_get "$t" color2)\""
+    fi
+  } | om_write "$config"
 }
 
 om_herdr_config() {
