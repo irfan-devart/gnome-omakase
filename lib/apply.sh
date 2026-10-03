@@ -5,11 +5,11 @@ apply_gnome() {
   local t=$1 mode
   mode=$(dk_get "$t" mode)
   if [[ $mode == "dark" ]]; then
-    dk_run gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"
+    dk_gset org.gnome.desktop.interface color-scheme "prefer-dark"
   else
-    dk_run gsettings set org.gnome.desktop.interface color-scheme "default"
+    dk_gset org.gnome.desktop.interface color-scheme "default"
   fi
-  dk_run gsettings set org.gnome.desktop.interface accent-color "$(dk_get "$t" gnome_accent)"
+  dk_gset org.gnome.desktop.interface accent-color "$(dk_get "$t" gnome_accent)"
 }
 
 apply_ptyxis() {
@@ -35,17 +35,26 @@ apply_ptyxis() {
     done
   } | dk_write "$palette_dir/dk-$id.palette"
 
-  dk_run gsettings set "org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$profile/" palette "dk-$id"
-  dk_run gsettings set org.gnome.Ptyxis interface-style "$(dk_get "$t" mode)"
+  dk_gset "org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$profile/" palette "dk-$id"
+  dk_gset org.gnome.Ptyxis interface-style "$(dk_get "$t" mode)"
 }
 
 apply_herdr() {
-  local t=$1 config name
+  local t=$1 config
   command -v herdr > /dev/null || return 0
-  config="${HERDR_CONFIG_PATH:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr/config.toml}"
+  config=$(dk_herdr_config)
   [[ -f $config ]] || return 0
-  name=$(dk_get "$t" herdr)
   dk_backup_once "$config" herdr-config.toml
+  dk_remember herdr "$config" name "$(sed -n -E '/^\[theme\]/,/^\[/ s/^name[[:space:]]*=[[:space:]]*"([^"]*)".*/\1/p' "$config" | head -1)"
+  dk_herdr_set_name "$config" "$(dk_get "$t" herdr)"
+}
+
+dk_herdr_config() {
+  echo "${HERDR_CONFIG_PATH:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr/config.toml}"
+}
+
+dk_herdr_set_name() {
+  local config=$1 name=$2
 
   # Set name = "..." inside the [theme] table only: replace it if present,
   # else add it under the header. Without a [theme] table, append one.
@@ -75,6 +84,7 @@ apply_claude() {
   [[ -f $settings ]] || return 0
   value=$(dk_get "$t" claude)
   dk_backup_once "$settings" claude-settings.json
+  dk_remember claude "$settings" theme "$(jq -r '.theme // ""' "$settings")"
   jq --arg theme "$value" '.theme = $theme' "$settings" | dk_write "$settings"
 }
 
@@ -86,10 +96,10 @@ apply_tactile() {
   accent=$(dk_get "$t" accent)
   fg=$(dk_get "$t" foreground)
   r=$((16#${accent:1:2})); g=$((16#${accent:3:2})); b=$((16#${accent:5:2}))
-  dk_run dconf write /org/gnome/shell/extensions/tactile/background-color "'rgba($r,$g,$b,0.15)'"
-  dk_run dconf write /org/gnome/shell/extensions/tactile/border-color "'rgba($r,$g,$b,0.8)'"
+  dk_dset /org/gnome/shell/extensions/tactile/background-color "'rgba($r,$g,$b,0.15)'"
+  dk_dset /org/gnome/shell/extensions/tactile/border-color "'rgba($r,$g,$b,0.8)'"
   r=$((16#${fg:1:2})); g=$((16#${fg:3:2})); b=$((16#${fg:5:2}))
-  dk_run dconf write /org/gnome/shell/extensions/tactile/text-color "'rgba($r,$g,$b,1.0)'"
+  dk_dset /org/gnome/shell/extensions/tactile/text-color "'rgba($r,$g,$b,1.0)'"
 }
 
 # Wallpaper: the first image in the user's folder for this theme, else one
@@ -110,21 +120,11 @@ apply_wallpaper() {
     dk_generate_wallpaper "$t" | dk_write "$image"
   fi
 
-  if [[ ! -f $DK_BACKUPS/wallpaper.txt && $DK_DRY_RUN != "1" ]]; then
-    mkdir -p "$DK_BACKUPS"
-    {
-      echo "background picture-uri $(gsettings get org.gnome.desktop.background picture-uri)"
-      echo "background picture-uri-dark $(gsettings get org.gnome.desktop.background picture-uri-dark)"
-      echo "background picture-options $(gsettings get org.gnome.desktop.background picture-options)"
-      echo "screensaver picture-uri $(gsettings get org.gnome.desktop.screensaver picture-uri)"
-    } > "$DK_BACKUPS/wallpaper.txt"
-  fi
-
   uri="file://$image"
-  dk_run gsettings set org.gnome.desktop.background picture-uri "$uri"
-  dk_run gsettings set org.gnome.desktop.background picture-uri-dark "$uri"
-  dk_run gsettings set org.gnome.desktop.background picture-options "zoom"
-  dk_run gsettings set org.gnome.desktop.screensaver picture-uri "$uri"
+  dk_gset org.gnome.desktop.background picture-uri "$uri"
+  dk_gset org.gnome.desktop.background picture-uri-dark "$uri"
+  dk_gset org.gnome.desktop.background picture-options "zoom"
+  dk_gset org.gnome.desktop.screensaver picture-uri "$uri"
 }
 
 # A soft gradient with two blurred glows in the theme's accent colours.

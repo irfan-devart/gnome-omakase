@@ -49,6 +49,34 @@ dk_backup_once() {
   dk_run cp -p "$file" "$DK_BACKUPS/$name"
 }
 
+# The first time we change a setting, record its original value in prior.tsv,
+# so uninstall can put it back. Later changes don't overwrite the record.
+DK_PRIOR="$DK_STATE/prior.tsv"
+
+dk_remember() {
+  local kind=$1 where=$2 key=$3 value=$4
+  [[ $DK_DRY_RUN == "1" ]] && return 0
+  mkdir -p "$DK_STATE"
+  if [[ -f $DK_PRIOR ]] && grep -qF -- "$kind"$'\t'"$where"$'\t'"$key"$'\t' "$DK_PRIOR"; then
+    return 0
+  fi
+  printf '%s\t%s\t%s\t%s\n' "$kind" "$where" "$key" "$value" >> "$DK_PRIOR"
+}
+
+# gsettings set, remembering the original value first.
+dk_gset() {
+  local schema=$1 key=$2 value=$3
+  dk_remember gsettings "$schema" "$key" "$(gsettings get "$schema" "$key")"
+  dk_run gsettings set "$schema" "$key" "$value"
+}
+
+# dconf write, remembering the original value (empty means unset) first.
+dk_dset() {
+  local path=$1 value=$2
+  dk_remember dconf "$(dirname "$path")" "$(basename "$path")" "$(dconf read "$path")"
+  dk_run dconf write "$path" "$value"
+}
+
 # Resolve a theme id to its folder. User themes override bundled ones.
 dk_theme_dir() {
   local id=$1
