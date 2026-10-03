@@ -1,0 +1,9 @@
+# Focus changer: move focus to the window in that direction.
+# Its defaults (Super+H/J/K/L) clash with GNOME's minimize and lock screen,
+# and Super+Alt+Arrow switches workspaces, so Ctrl+Super+Arrow is used.
+# Load with: dconf load /org/gnome/shell/extensions/focus-changer/ < focus-changer.dconf
+[/]
+focus-left=['<Control><Super>Left']
+focus-right=['<Control><Super>Right']
+focus-up=['<Control><Super>Up']
+focus-down=['<Control><Super>Down']
