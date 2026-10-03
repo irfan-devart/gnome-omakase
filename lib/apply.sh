@@ -78,6 +78,68 @@ apply_claude() {
   jq --arg theme "$value" '.theme = $theme' "$settings" | dk_write "$settings"
 }
 
+# Wallpaper: the first image in the user's folder for this theme, else one
+# generated from the palette. Only plain file names are used, so the URI
+# needs no escaping.
+apply_wallpaper() {
+  local t=$1 id=$2 image="" file uri
+  local user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/desktop-kit/backgrounds/$id"
+
+  for file in "$user_dir"/*; do
+    [[ -f $file && $(basename "$file") =~ ^[A-Za-z0-9._-]+\.(jpg|jpeg|png|svg|webp)$ ]] || continue
+    image=$file
+    break
+  done
+
+  if [[ -z $image ]]; then
+    image="$DK_STATE/wallpapers/$id.svg"
+    dk_generate_wallpaper "$t" | dk_write "$image"
+  fi
+
+  if [[ ! -f $DK_BACKUPS/wallpaper.txt && $DK_DRY_RUN != "1" ]]; then
+    mkdir -p "$DK_BACKUPS"
+    {
+      echo "background picture-uri $(gsettings get org.gnome.desktop.background picture-uri)"
+      echo "background picture-uri-dark $(gsettings get org.gnome.desktop.background picture-uri-dark)"
+      echo "background picture-options $(gsettings get org.gnome.desktop.background picture-options)"
+      echo "screensaver picture-uri $(gsettings get org.gnome.desktop.screensaver picture-uri)"
+    } > "$DK_BACKUPS/wallpaper.txt"
+  fi
+
+  uri="file://$image"
+  dk_run gsettings set org.gnome.desktop.background picture-uri "$uri"
+  dk_run gsettings set org.gnome.desktop.background picture-uri-dark "$uri"
+  dk_run gsettings set org.gnome.desktop.background picture-options "zoom"
+  dk_run gsettings set org.gnome.desktop.screensaver picture-uri "$uri"
+}
+
+# A soft gradient with two blurred glows in the theme's accent colours.
+dk_generate_wallpaper() {
+  local t=$1 bg c0 accent c5 c6
+  bg=$(dk_get "$t" background)
+  c0=$(dk_get "$t" color0)
+  accent=$(dk_get "$t" accent)
+  c5=$(dk_get "$t" color5)
+  c6=$(dk_get "$t" color6)
+  cat << EOF
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 2000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="$bg"/>
+      <stop offset="1" stop-color="$c0"/>
+    </linearGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="220"/>
+    </filter>
+  </defs>
+  <rect width="3200" height="2000" fill="url(#base)"/>
+  <circle cx="2450" cy="520" r="620" fill="$accent" opacity="0.30" filter="url(#soft)"/>
+  <circle cx="700" cy="1600" r="560" fill="$c5" opacity="0.22" filter="url(#soft)"/>
+  <circle cx="1700" cy="1250" r="380" fill="$c6" opacity="0.14" filter="url(#soft)"/>
+</svg>
+EOF
+}
+
 apply_rofi() {
   local t=$1
   command -v rofi > /dev/null || return 0

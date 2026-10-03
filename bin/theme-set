@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Apply a theme across GNOME, Ptyxis, Herdr, Claude Code and rofi.
+# Apply a theme across GNOME, Ptyxis, Herdr, Claude Code, rofi and the wallpaper.
 # Usage: theme-set [--dry-run] <theme-id>
 
 set -euo pipefail
@@ -29,6 +29,7 @@ apply_ptyxis "$theme" "$id"
 apply_herdr "$theme"
 apply_claude "$theme"
 apply_rofi "$theme"
+apply_wallpaper "$theme" "$id"
 
 if [[ $DK_DRY_RUN != "1" ]]; then
   mkdir -p "$DK_STATE"
