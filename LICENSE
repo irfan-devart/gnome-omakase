@@ -26,6 +26,12 @@ Third-party colour palettes in themes/:
 
 - Gruvbox, by Pavel Pertsev (https://github.com/morhetz/gruvbox), MIT.
 - Tokyo Night, by enkia (https://github.com/enkia/tokyo-night-vscode-theme), MIT.
+- Catppuccin (https://github.com/catppuccin), MIT.
+- Kanagawa, by rebelot (https://github.com/rebelot/kanagawa.nvim), MIT.
+- Nord, by Arctic Ice Studio (https://github.com/nordtheme), MIT.
+- Everforest, by sainnhe (https://github.com/sainnhe/everforest), MIT.
+- Rose Pine (https://github.com/rose-pine), MIT.
+- Matte Black and White, from Omabuntu.
 
 The palette values were taken from Omabuntu's theme files
 (https://github.com/omakasui/omabuntu), which its README states are MIT;

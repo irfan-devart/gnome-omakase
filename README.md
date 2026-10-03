@@ -20,7 +20,7 @@ Tested on Ubuntu 26.04, GNOME 50.
 
 The browser shortcut opens your default browser. Change it, and other default apps, in GNOME Settings > Apps > Default Apps.
 
-One theme switch covers GNOME, the terminal (Ghostty and Ptyxis), Herdr, Claude Code, the launcher, the tiling grid and the wallpaper. Themes: Tokyo Night, Gruvbox, Gruvbox Light.
+One theme switch covers GNOME, the terminal (Ghostty and Ptyxis), Herdr, Claude Code, the launcher, the tiling grid and the wallpaper. Eleven themes: Catppuccin Mocha and Latte, Tokyo Night, Kanagawa, Nord, Everforest, Rose Pine Dawn, Gruvbox and Gruvbox Light, Matte Black, White.
 
 ## Install
 
@@ -57,4 +57,4 @@ GNOME doesn't auto-tile like Hyprland: Tactile places windows, Focus changer mov
 
 ## Credits
 
-[Omarchy](https://omarchy.org) for the idea, [Omabuntu](https://github.com/omakasui/omabuntu) for the Ubuntu groundwork. Palettes: [Gruvbox](https://github.com/morhetz/gruvbox) and [Tokyo Night](https://github.com/enkia/tokyo-night-vscode-theme), both MIT. MIT licence.
+[Omarchy](https://omarchy.org) for the idea, [Omabuntu](https://github.com/omakasui/omabuntu) for the Ubuntu groundwork and the theme palettes (Catppuccin, Tokyo Night, Kanagawa, Nord, Everforest, Rosé Pine, Gruvbox and others, each MIT by their authors). MIT licence.
