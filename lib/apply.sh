@@ -78,6 +78,21 @@ apply_claude() {
   jq --arg theme "$value" '.theme = $theme' "$settings" | dk_write "$settings"
 }
 
+# Tactile tiling grid: theme colours plus Omabuntu's 10px gaps. dconf is used
+# because Tactile's schema lives in the user's extension folder, not system-wide.
+apply_tactile() {
+  local t=$1 accent fg r g b
+  gnome-extensions info tactile@lundal.io > /dev/null 2>&1 || return 0
+  accent=$(dk_get "$t" accent)
+  fg=$(dk_get "$t" foreground)
+  r=$((16#${accent:1:2})); g=$((16#${accent:3:2})); b=$((16#${accent:5:2}))
+  dk_run dconf write /org/gnome/shell/extensions/tactile/background-color "'rgba($r,$g,$b,0.15)'"
+  dk_run dconf write /org/gnome/shell/extensions/tactile/border-color "'rgba($r,$g,$b,0.8)'"
+  r=$((16#${fg:1:2})); g=$((16#${fg:3:2})); b=$((16#${fg:5:2}))
+  dk_run dconf write /org/gnome/shell/extensions/tactile/text-color "'rgba($r,$g,$b,1.0)'"
+  dk_run dconf write /org/gnome/shell/extensions/tactile/gap-size 10
+}
+
 # Wallpaper: the first image in the user's folder for this theme, else one
 # generated from the palette. Only plain file names are used, so the URI
 # needs no escaping.
