@@ -80,6 +80,17 @@ for link in "$HOME"/.local/bin/*; do
     echo "  removed $(basename "$link")"
   fi
 done
+ghostty_config="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/config"
+if [[ -f $ghostty_config ]] && grep -q '^# gnome-omakase start' "$ghostty_config"; then
+  if [[ $(sed '/^# gnome-omakase start/,/^# gnome-omakase end/d' "$ghostty_config" | tr -d '[:space:]') == "" ]]; then
+    om_run rm "$ghostty_config"
+  else
+    # shellcheck disable=SC2016 # sed script, not shell
+    om_rewrite "$ghostty_config" sed '/^# gnome-omakase start/,/^# gnome-omakase end/d' "$ghostty_config"
+  fi
+  echo "  removed Ghostty settings"
+fi
+om_run rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/omakase-theme"
 ptyxis_override="${XDG_DATA_HOME:-$HOME/.local/share}/applications/org.gnome.Ptyxis.desktop"
 if [[ -f $ptyxis_override ]] && grep -q '^# gnome-omakase' "$ptyxis_override"; then
   om_run rm "$ptyxis_override"

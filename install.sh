@@ -87,6 +87,20 @@ if [[ -f $ptyxis_desktop ]]; then
   fi
 fi
 
+# Ghostty: borderless, themed. Our lines sit in a marked block so uninstall
+# removes exactly them and nothing else in the user's config.
+ghostty_config="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/config"
+if command -v ghostty > /dev/null && ! grep -q '^# gnome-omakase start' "$ghostty_config" 2> /dev/null; then
+  {
+    [[ -f $ghostty_config ]] && cat "$ghostty_config"
+    echo "# gnome-omakase start"
+    echo "window-decoration = false"
+    echo "config-file = ?omakase-theme"
+    echo "# gnome-omakase end"
+  } | om_write "$ghostty_config"
+  echo "  Ghostty: borderless, follows the theme"
+fi
+
 echo "== Window keys"
 # Super+Space becomes the launcher, so input-source switching moves over.
 if [[ $(gsettings get org.gnome.desktop.wm.keybindings switch-input-source) == *"'<Super>space'"* ]]; then
@@ -114,12 +128,17 @@ echo "== Shortcuts"
 bin="$HOME/.local/bin"
 om_kb_add launcher "Launcher" "$bin/launcher-toggle" "<Super>space"
 om_kb_add theme-menu "Theme menu" "$bin/theme-menu" "<Shift><Control><Super>space"
-for term in ptyxis gnome-terminal kgx; do
-  if command -v "$term" > /dev/null; then
-    om_kb_add terminal "Terminal" "$term --new-window" "<Super>Return"
-    break
-  fi
-done
+# Ghostty first: it's the borderless one. The others open a new window.
+if command -v ghostty > /dev/null; then
+  om_kb_add terminal "Terminal" "ghostty" "<Super>Return"
+else
+  for term in ptyxis gnome-terminal kgx; do
+    if command -v "$term" > /dev/null; then
+      om_kb_add terminal "Terminal" "$term --new-window" "<Super>Return"
+      break
+    fi
+  done
+fi
 om_kb_add browser "Browser" "$bin/browser" "<Shift><Super>b"
 command -v nautilus > /dev/null && om_kb_add files "Files" "nautilus --new-window" "<Shift><Super>f"
 

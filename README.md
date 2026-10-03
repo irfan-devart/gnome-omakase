@@ -12,7 +12,7 @@ Tested on Ubuntu 26.04, GNOME 50.
 |---|---|
 | `Super+Space` | Launch apps |
 | `Shift+Ctrl+Super+Space` | Switch theme |
-| `Super+Return` / `Shift+Super+B` / `Shift+Super+F` | Terminal / browser / files |
+| `Super+Return` / `Shift+Super+B` / `Shift+Super+F` | Terminal (borderless Ghostty if installed) / browser / files |
 | `Super+W` | Close window |
 | `Super+T`, then two tiles | Tile the window |
 | `Ctrl+Super+Arrow` | Focus the window on that side |
@@ -20,13 +20,13 @@ Tested on Ubuntu 26.04, GNOME 50.
 
 The browser shortcut opens your default browser. Change it, and other default apps, in GNOME Settings > Apps > Default Apps.
 
-One theme switch covers GNOME, the terminal (Ptyxis), Herdr, Claude Code, the launcher, the tiling grid and the wallpaper. Themes: Tokyo Night, Gruvbox, Gruvbox Light.
+One theme switch covers GNOME, the terminal (Ghostty and Ptyxis), Herdr, Claude Code, the launcher, the tiling grid and the wallpaper. Themes: Tokyo Night, Gruvbox, Gruvbox Light.
 
 ## Install
 
 ```bash
 git clone https://github.com/irfan-devart/gnome-omakase.git && cd gnome-omakase
-sudo apt install rofi jq gnome-shell-extensions   # then log out and in once
+sudo apt install rofi jq gnome-shell-extensions ghostty   # then log out and in once
 ./install.sh --dry-run        # see every change first
 ./install.sh --extensions     # then do it
 ```

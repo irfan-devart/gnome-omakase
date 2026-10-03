@@ -39,6 +39,24 @@ apply_ptyxis() {
   om_gset org.gnome.Ptyxis interface-style "$(om_get "$t" mode)"
 }
 
+# Ghostty reads the colours from a file we own, pulled in by one line in the
+# user's config (see install.sh). Open windows update on Ctrl+Shift+,.
+apply_ghostty() {
+  local t=$1 i
+  command -v ghostty > /dev/null || return 0
+  {
+    echo "# Written by gnome-omakase theme-set. Changes here are overwritten."
+    echo "background = $(om_get "$t" background)"
+    echo "foreground = $(om_get "$t" foreground)"
+    echo "cursor-color = $(om_get "$t" cursor)"
+    echo "selection-background = $(om_get "$t" selection_background)"
+    echo "selection-foreground = $(om_get "$t" selection_foreground)"
+    for i in {0..15}; do
+      echo "palette = $i=$(om_get "$t" "color$i")"
+    done
+  } | om_write "${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/omakase-theme"
+}
+
 apply_herdr() {
   local t=$1 config
   command -v herdr > /dev/null || return 0

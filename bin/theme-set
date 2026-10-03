@@ -26,6 +26,7 @@ done
 
 apply_gnome "$theme"
 apply_ptyxis "$theme" "$id"
+apply_ghostty "$theme"
 apply_herdr "$theme"
 apply_claude "$theme"
 apply_rofi "$theme"
