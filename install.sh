@@ -137,6 +137,17 @@ for ext in "${EXTENSIONS[@]}"; do
   fi
 done
 
+# GNOME's own Workspace Indicator ships in Ubuntu's gnome-shell-extensions
+# package, so it's enabled when present rather than downloaded.
+indicator=workspace-indicator@gnome-shell-extensions.gcampax.github.com
+if gnome-extensions info "$indicator" > /dev/null 2>&1; then
+  om_run gnome-extensions enable "$indicator"
+  om_gset org.gnome.shell.extensions.workspace-indicator embed-previews false
+  echo "  workspace indicator enabled"
+else
+  echo "  workspace indicator: sudo apt install gnome-shell-extensions, then log in again"
+fi
+
 # Load our defaults for each installed extension, one key at a time so
 # uninstall can restore every original value.
 for file in "$OM_ROOT"/defaults/*.dconf; do

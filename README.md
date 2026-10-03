@@ -16,7 +16,7 @@ Tested on Ubuntu 26.04, GNOME 50.
 | `Super+W` | Close window |
 | `Super+T`, then two tiles | Tile the window |
 | `Ctrl+Super+Arrow` | Focus the window on that side |
-| `Super+Alt+1-4` | Go to workspace (add `Shift` to take the window) |
+| `Super+Alt+1-4` | Go to workspace (add `Shift` to take the window); the panel shows which one you're on |
 
 The browser shortcut opens your default browser. Change it, and other default apps, in GNOME Settings > Apps > Default Apps.
 
@@ -26,7 +26,7 @@ One theme switch covers GNOME, the terminal (Ptyxis), Herdr, Claude Code, the la
 
 ```bash
 git clone https://github.com/irfan-devart/gnome-omakase.git && cd gnome-omakase
-sudo apt install rofi jq
+sudo apt install rofi jq gnome-shell-extensions   # then log out and in once
 ./install.sh --dry-run        # see every change first
 ./install.sh --extensions     # then do it
 ```
