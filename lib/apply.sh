@@ -3,13 +3,13 @@
 
 apply_gnome() {
   local t=$1 mode
-  mode=$(dk_get "$t" mode)
+  mode=$(om_get "$t" mode)
   if [[ $mode == "dark" ]]; then
-    dk_gset org.gnome.desktop.interface color-scheme "prefer-dark"
+    om_gset org.gnome.desktop.interface color-scheme "prefer-dark"
   else
-    dk_gset org.gnome.desktop.interface color-scheme "default"
+    om_gset org.gnome.desktop.interface color-scheme "default"
   fi
-  dk_gset org.gnome.desktop.interface accent-color "$(dk_get "$t" gnome_accent)"
+  om_gset org.gnome.desktop.interface accent-color "$(om_get "$t" gnome_accent)"
 }
 
 apply_ptyxis() {
@@ -22,49 +22,49 @@ apply_ptyxis() {
   # Same colours in both sections, so the palette holds whatever Ptyxis' own style is.
   {
     echo "[Palette]"
-    echo "Name=dk-$id"
+    echo "Name=omakase-$id"
     for section in Light Dark; do
       echo
       echo "[$section]"
-      echo "Background=$(dk_get "$t" background)"
-      echo "Foreground=$(dk_get "$t" foreground)"
-      echo "Cursor=$(dk_get "$t" cursor)"
+      echo "Background=$(om_get "$t" background)"
+      echo "Foreground=$(om_get "$t" foreground)"
+      echo "Cursor=$(om_get "$t" cursor)"
       for i in {0..15}; do
-        echo "Color$i=$(dk_get "$t" "color$i")"
+        echo "Color$i=$(om_get "$t" "color$i")"
       done
     done
-  } | dk_write "$palette_dir/dk-$id.palette"
+  } | om_write "$palette_dir/omakase-$id.palette"
 
-  dk_gset "org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$profile/" palette "dk-$id"
-  dk_gset org.gnome.Ptyxis interface-style "$(dk_get "$t" mode)"
+  om_gset "org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$profile/" palette "omakase-$id"
+  om_gset org.gnome.Ptyxis interface-style "$(om_get "$t" mode)"
 }
 
 apply_herdr() {
   local t=$1 config
   command -v herdr > /dev/null || return 0
-  config=$(dk_herdr_config)
+  config=$(om_herdr_config)
   [[ -f $config ]] || return 0
-  dk_backup_once "$config" herdr-config.toml
+  om_backup_once "$config" herdr-config.toml
   local old
   old=$(sed -n -E '/^\[theme\]/,/^\[/ s/^name[[:space:]]*=[[:space:]]*"([^"]*)".*/\1/p' "$config" | head -1)
   [[ $old =~ ^[a-z0-9-]{1,40}$ ]] || old=""
-  dk_remember herdr "$config" name "$old"
-  dk_herdr_set_name "$config" "$(dk_get "$t" herdr)"
+  om_remember herdr "$config" name "$old"
+  om_herdr_set_name "$config" "$(om_get "$t" herdr)"
 }
 
-dk_herdr_config() {
+om_herdr_config() {
   echo "${HERDR_CONFIG_PATH:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr/config.toml}"
 }
 
-dk_herdr_set_name() {
+om_herdr_set_name() {
   local config=$1 name=$2
 
   # Set name = "..." inside the [theme] table only: replace it if present,
   # else add it under the header. Without a [theme] table, append one.
   if grep -qE '^\[theme\][[:space:]]*(#.*)?$' "$config"; then
     # shellcheck disable=SC2016 # awk program, not shell
-    DK_NAME="$name" dk_rewrite "$config" awk '
-      BEGIN { name = ENVIRON["DK_NAME"] }
+    OM_NAME="$name" om_rewrite "$config" awk '
+      BEGIN { name = ENVIRON["OM_NAME"] }
       /^\[/ { in_theme = ($0 ~ /^\[theme\][[:space:]]*(#.*)?$/) }
       in_theme && /^name[[:space:]]*=/ { has_name = 1 }
       { lines[NR] = $0; theme[NR] = in_theme }
@@ -77,9 +77,9 @@ dk_herdr_set_name() {
       }
     ' "$config"
   else
-    { cat "$config"; printf '\n[theme]\nname = "%s"\n' "$name"; } | dk_write "$config"
+    { cat "$config"; printf '\n[theme]\nname = "%s"\n' "$name"; } | om_write "$config"
   fi
-  dk_run herdr server reload-config > /dev/null 2>&1 || true
+  om_run herdr server reload-config > /dev/null 2>&1 || true
 }
 
 apply_claude() {
@@ -87,18 +87,18 @@ apply_claude() {
   command -v jq > /dev/null || return 0
   settings="$HOME/.claude/settings.json"
   [[ -f $settings ]] || return 0
-  value=$(dk_get "$t" claude)
+  value=$(om_get "$t" claude)
   jq -e . "$settings" > /dev/null 2>&1 || {
     echo "  skip Claude Code: $settings isn't plain JSON" >&2
     return 0
   }
-  dk_backup_once "$settings" claude-settings.json
+  om_backup_once "$settings" claude-settings.json
   local old
   old=$(jq -r 'if (.theme | type) == "string" then .theme else "" end' "$settings")
   [[ $old =~ ^[a-z0-9-]{0,40}$ ]] || old=""
-  dk_remember claude "$settings" theme "$old"
+  om_remember claude "$settings" theme "$old"
   # shellcheck disable=SC2016 # jq variable, not shell
-  dk_rewrite "$settings" jq --arg theme "$value" '.theme = $theme' "$settings"
+  om_rewrite "$settings" jq --arg theme "$value" '.theme = $theme' "$settings"
 }
 
 # Tactile tiling grid colours. Gaps and grids live in defaults/tactile.dconf. dconf is used
@@ -106,13 +106,13 @@ apply_claude() {
 apply_tactile() {
   local t=$1 accent fg r g b
   gnome-extensions info tactile@lundal.io > /dev/null 2>&1 || return 0
-  accent=$(dk_get "$t" accent)
-  fg=$(dk_get "$t" foreground)
+  accent=$(om_get "$t" accent)
+  fg=$(om_get "$t" foreground)
   r=$((16#${accent:1:2})); g=$((16#${accent:3:2})); b=$((16#${accent:5:2}))
-  dk_dset /org/gnome/shell/extensions/tactile/background-color "'rgba($r,$g,$b,0.15)'"
-  dk_dset /org/gnome/shell/extensions/tactile/border-color "'rgba($r,$g,$b,0.8)'"
+  om_dset /org/gnome/shell/extensions/tactile/background-color "'rgba($r,$g,$b,0.15)'"
+  om_dset /org/gnome/shell/extensions/tactile/border-color "'rgba($r,$g,$b,0.8)'"
   r=$((16#${fg:1:2})); g=$((16#${fg:3:2})); b=$((16#${fg:5:2}))
-  dk_dset /org/gnome/shell/extensions/tactile/text-color "'rgba($r,$g,$b,1.0)'"
+  om_dset /org/gnome/shell/extensions/tactile/text-color "'rgba($r,$g,$b,1.0)'"
 }
 
 # Wallpaper: the first image in the user's folder for this theme, else one
@@ -120,7 +120,7 @@ apply_tactile() {
 # needs no escaping.
 apply_wallpaper() {
   local t=$1 id=$2 image="" file uri
-  local user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/desktop-kit/backgrounds/$id"
+  local user_dir="${XDG_CONFIG_HOME:-$HOME/.config}/gnome-omakase/backgrounds/$id"
 
   for file in "$user_dir"/*; do
     [[ -f $file && $(basename "$file") =~ ^[A-Za-z0-9._-]+\.(jpg|jpeg|png|svg|webp)$ ]] || continue
@@ -129,19 +129,19 @@ apply_wallpaper() {
   done
 
   if [[ -z $image ]]; then
-    image="$DK_STATE/wallpapers/$id.svg"
-    dk_generate_wallpaper "$t" | dk_write "$image"
+    image="$OM_STATE/wallpapers/$id.svg"
+    om_generate_wallpaper "$t" | om_write "$image"
   fi
 
-  uri="file://$(dk_uri_path "$image")"
-  dk_gset org.gnome.desktop.background picture-uri "$uri"
-  dk_gset org.gnome.desktop.background picture-uri-dark "$uri"
-  dk_gset org.gnome.desktop.background picture-options "zoom"
-  dk_gset org.gnome.desktop.screensaver picture-uri "$uri"
+  uri="file://$(om_uri_path "$image")"
+  om_gset org.gnome.desktop.background picture-uri "$uri"
+  om_gset org.gnome.desktop.background picture-uri-dark "$uri"
+  om_gset org.gnome.desktop.background picture-options "zoom"
+  om_gset org.gnome.desktop.screensaver picture-uri "$uri"
 }
 
 # Percent-encode a path for a file:// URI.
-dk_uri_path() {
+om_uri_path() {
   local path=$1 out="" c i
   for (( i = 0; i < ${#path}; i++ )); do
     c=${path:i:1}
@@ -155,13 +155,13 @@ dk_uri_path() {
 }
 
 # A soft gradient with two blurred glows in the theme's accent colours.
-dk_generate_wallpaper() {
+om_generate_wallpaper() {
   local t=$1 bg c0 accent c5 c6
-  bg=$(dk_get "$t" background)
-  c0=$(dk_get "$t" color0)
-  accent=$(dk_get "$t" accent)
-  c5=$(dk_get "$t" color5)
-  c6=$(dk_get "$t" color6)
+  bg=$(om_get "$t" background)
+  c0=$(om_get "$t" color0)
+  accent=$(om_get "$t" accent)
+  c5=$(om_get "$t" color5)
+  c6=$(om_get "$t" color6)
   cat << EOF
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3200 2000" preserveAspectRatio="xMidYMid slice">
   <defs>
@@ -184,13 +184,13 @@ EOF
 apply_rofi() {
   local t=$1
   command -v rofi > /dev/null || return 0
-  dk_write "$DK_STATE/rofi.rasi" << EOF
+  om_write "$OM_STATE/rofi.rasi" << EOF
 * {
-  bg: $(dk_get "$t" background);
-  fg: $(dk_get "$t" foreground);
-  accent: $(dk_get "$t" accent);
-  sel-fg: $(dk_get "$t" selection_foreground);
-  sel-bg: $(dk_get "$t" selection_background);
+  bg: $(om_get "$t" background);
+  fg: $(om_get "$t" foreground);
+  accent: $(om_get "$t" accent);
+  sel-fg: $(om_get "$t" selection_foreground);
+  sel-bg: $(om_get "$t" selection_background);
   background-color: transparent;
   text-color: @fg;
   font: "Sans 12";

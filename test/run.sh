@@ -63,7 +63,7 @@ done
 check "refuses path in theme id" refuses "$root/bin/theme-set" --dry-run "../etc"
 check "refuses unknown theme" refuses "$root/bin/theme-set" --dry-run "no-such-theme"
 
-bad="$XDG_CONFIG_HOME/desktop-kit/themes/bad"
+bad="$XDG_CONFIG_HOME/gnome-omakase/themes/bad"
 mkdir -p "$bad"
 sed 's/^background = .*/background = "red; rm -rf ~"/' "$root/themes/tokyo-night/theme.toml" > "$bad/theme.toml"
 check "refuses non-colour value" refuses "$root/bin/theme-set" --dry-run bad
@@ -79,7 +79,7 @@ herdr_case() {
     source "$root/lib/apply.sh"
     # shellcheck disable=SC2329 # stub called by the code under test
     herdr() { :; }
-    dk_herdr_set_name "$tmp/herdr.toml" "tokyo-night"
+    om_herdr_set_name "$tmp/herdr.toml" "tokyo-night"
   )
   [[ $(cat "$tmp/herdr.toml") == "$(printf '%b' "$expected")" ]]
 }
@@ -98,7 +98,7 @@ broken_json() {
   printf '{ "theme": "dark", }\n' > "$tmp/settings.json"
   (
     source "$root/lib/common.sh"
-    dk_rewrite "$tmp/settings.json" jq '.theme = "x"' "$tmp/settings.json"
+    om_rewrite "$tmp/settings.json" jq '.theme = "x"' "$tmp/settings.json"
   ) 2> /dev/null && return 1
   [[ $(cat "$tmp/settings.json") == '{ "theme": "dark", }' ]]
 }
@@ -108,14 +108,14 @@ check "failed jq leaves file intact" broken_json
 through_symlink() {
   printf 'a\n' > "$tmp/real.txt"
   ln -sf "$tmp/real.txt" "$tmp/link.txt"
-  ( source "$root/lib/common.sh"; printf 'b\n' | dk_write "$tmp/link.txt" )
+  ( source "$root/lib/common.sh"; printf 'b\n' | om_write "$tmp/link.txt" )
   [[ -L $tmp/link.txt && $(cat "$tmp/real.txt") == "b" ]]
 }
 check "writes through symlinks" through_symlink
 
 uri_encoding() {
   local out
-  out=$( source "$root/lib/common.sh"; source "$root/lib/apply.sh"; dk_uri_path "/home/a b/50%.svg" )
+  out=$( source "$root/lib/common.sh"; source "$root/lib/apply.sh"; om_uri_path "/home/a b/50%.svg" )
   [[ $out == "/home/a%20b/50%25.svg" ]]
 }
 check "wallpaper path is URI-encoded" uri_encoding
@@ -125,7 +125,7 @@ check "install rejects --theme without id" refuses "$root/install.sh" --dry-run 
 
 check "guard blocks desktop writes" refuses gsettings set org.gnome.desktop.interface accent-color blue
 
-check "dry run writes nothing" test ! -e "$tmp/state/desktop-kit/current"
+check "dry run writes nothing" test ! -e "$tmp/state/gnome-omakase/current"
 
 echo
 if (( fails > 0 )); then

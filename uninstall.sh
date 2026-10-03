@@ -7,21 +7,21 @@
 set -euo pipefail
 
 source "$(dirname "$(readlink -f "$0")")/lib/common.sh"
-source "$DK_ROOT/lib/apply.sh"
-source "$DK_ROOT/lib/keys.sh"
+source "$OM_ROOT/lib/apply.sh"
+source "$OM_ROOT/lib/keys.sh"
 
 case ${1:-} in
   "") ;;
-  --dry-run) DK_DRY_RUN=1 ;;
+  --dry-run) OM_DRY_RUN=1 ;;
   -h | --help) sed -n '3,5p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-  *) dk_die "unknown option '$1' (only --dry-run)" ;;
+  *) om_die "unknown option '$1' (only --dry-run)" ;;
 esac
 
 echo "== Shortcuts"
-dk_kb_remove_all
+om_kb_remove_all
 
 echo "== Settings"
-if [[ -f $DK_PRIOR ]]; then
+if [[ -f $OM_PRIOR ]]; then
   # One bad entry must not block the rest, so each restore runs in a
   # subshell and failures are reported, not fatal.
   failed=0
@@ -29,32 +29,32 @@ if [[ -f $DK_PRIOR ]]; then
     if (
       case $kind in
         gsettings)
-          dk_run gsettings set "$where" "$key" "$value" ;;
+          om_run gsettings set "$where" "$key" "$value" ;;
         dconf)
           if [[ -z $value ]]; then
-            dk_run dconf reset "$where/$key"
+            om_run dconf reset "$where/$key"
           else
-            dk_run dconf write "$where/$key" "$value"
+            om_run dconf write "$where/$key" "$value"
           fi ;;
         herdr)
           [[ -f $where ]] || exit 0
           if [[ -n $value ]]; then
-            dk_herdr_set_name "$where" "$value"
+            om_herdr_set_name "$where" "$value"
           else
             # shellcheck disable=SC2016 # awk program, not shell
-            dk_rewrite "$where" awk '
+            om_rewrite "$where" awk '
               /^\[/ { in_theme = ($0 ~ /^\[theme\]/) }
               in_theme && /^name[[:space:]]*=/ { next }
               { print }' "$where"
-            dk_run herdr server reload-config > /dev/null 2>&1 || true
+            om_run herdr server reload-config > /dev/null 2>&1 || true
           fi ;;
         claude)
           [[ -f $where ]] && command -v jq > /dev/null || exit 0
           if [[ -z $value ]]; then
-            dk_rewrite "$where" jq 'del(.theme)' "$where"
+            om_rewrite "$where" jq 'del(.theme)' "$where"
           else
             # shellcheck disable=SC2016 # jq variable, not shell
-            dk_rewrite "$where" jq --arg theme "$value" '.theme = $theme' "$where"
+            om_rewrite "$where" jq --arg theme "$value" '.theme = $theme' "$where"
           fi ;;
       esac
     ); then
@@ -63,11 +63,11 @@ if [[ -f $DK_PRIOR ]]; then
       echo "  could not restore $kind $where $key (original: $value)" >&2
       failed=1
     fi
-  done < "$DK_PRIOR"
+  done < "$OM_PRIOR"
   if (( failed )); then
     echo "  Some settings were not restored; prior.tsv is kept so you can retry." >&2
   else
-    dk_run mv "$DK_PRIOR" "$DK_PRIOR.restored"
+    om_run mv "$OM_PRIOR" "$OM_PRIOR.restored"
   fi
 else
   echo "  nothing recorded"
@@ -75,19 +75,19 @@ fi
 
 echo "== Files"
 for link in "$HOME"/.local/bin/*; do
-  if [[ -L $link && $(readlink -f "$link") == "$DK_ROOT"/bin/* ]]; then
-    dk_run rm "$link"
+  if [[ -L $link && $(readlink -f "$link") == "$OM_ROOT"/bin/* ]]; then
+    om_run rm "$link"
     echo "  removed $(basename "$link")"
   fi
 done
 while read -r id; do
-  palette="${XDG_DATA_HOME:-$HOME/.local/share}/org.gnome.Ptyxis/palettes/dk-$id.palette"
+  palette="${XDG_DATA_HOME:-$HOME/.local/share}/org.gnome.Ptyxis/palettes/omakase-$id.palette"
   if [[ -f $palette ]]; then
-    dk_run rm "$palette"
+    om_run rm "$palette"
   fi
-done < <(dk_theme_ids)
-dk_run rm -rf "$DK_STATE/wallpapers" "$DK_STATE/rofi.rasi" "$DK_STATE/current"
+done < <(om_theme_ids)
+om_run rm -rf "$OM_STATE/wallpapers" "$OM_STATE/rofi.rasi" "$OM_STATE/current"
 
 echo
-echo "Done. Backups kept in $DK_BACKUPS."
+echo "Done. Backups kept in $OM_BACKUPS."
 echo "Extensions left installed; remove them in Extension Manager if you like."
