@@ -18,7 +18,10 @@ while (( $# > 0 )); do
   case $1 in
     --dry-run) DK_DRY_RUN=1 ;;
     --extensions) want_extensions=1 ;;
-    --theme) theme=${2:-}; shift ;;
+    --theme)
+      [[ -n ${2:-} ]] || dk_die "--theme needs a theme id"
+      theme=$2
+      shift ;;
     -h | --help) sed -n '3,8p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) dk_die "unknown option '$1'" ;;
   esac
@@ -54,7 +57,7 @@ fi
 echo "== Commands in ~/.local/bin"
 for cmd in "$DK_ROOT"/bin/*; do
   link="$HOME/.local/bin/$(basename "$cmd")"
-  if [[ -e $link && ! -L $link ]]; then
+  if [[ -e $link || -L $link ]] && [[ $(readlink -f "$link") != "$cmd" ]]; then
     echo "  skip $(basename "$cmd"): $link exists and isn't ours"
     continue
   fi

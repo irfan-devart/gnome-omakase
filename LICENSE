@@ -22,5 +22,11 @@ SOFTWARE.
 
 ---
 
-The Gruvbox and Tokyo Night palettes in themes/ come from Omabuntu
-(https://github.com/omakasui/omabuntu), MIT licensed.
+Third-party colour palettes in themes/:
+
+- Gruvbox, by Pavel Pertsev (https://github.com/morhetz/gruvbox), MIT.
+- Tokyo Night, by enkia (https://github.com/enkia/tokyo-night-vscode-theme), MIT.
+
+The palette values were taken from Omabuntu's theme files
+(https://github.com/omakasui/omabuntu), which its README states are MIT;
+the repository publishes no separate copyright notice.

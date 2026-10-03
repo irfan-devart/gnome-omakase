@@ -10,38 +10,63 @@ source "$(dirname "$(readlink -f "$0")")/lib/common.sh"
 source "$DK_ROOT/lib/apply.sh"
 source "$DK_ROOT/lib/keys.sh"
 
-[[ ${1:-} == "--dry-run" ]] && DK_DRY_RUN=1
+case ${1:-} in
+  "") ;;
+  --dry-run) DK_DRY_RUN=1 ;;
+  -h | --help) sed -n '3,5p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  *) dk_die "unknown option '$1' (only --dry-run)" ;;
+esac
 
 echo "== Shortcuts"
 dk_kb_remove_all
 
 echo "== Settings"
 if [[ -f $DK_PRIOR ]]; then
-  # Newest first, so a setting changed twice ends on its oldest value.
+  # One bad entry must not block the rest, so each restore runs in a
+  # subshell and failures are reported, not fatal.
+  failed=0
   while IFS=$'\t' read -r kind where key value; do
-    case $kind in
-      gsettings)
-        dk_run gsettings set "$where" "$key" "$value" ;;
-      dconf)
-        if [[ -z $value ]]; then
-          dk_run dconf reset "$where/$key"
-        else
-          dk_run dconf write "$where/$key" "$value"
-        fi ;;
-      herdr)
-        [[ -f $where && -n $value ]] && dk_herdr_set_name "$where" "$value" ;;
-      claude)
-        if [[ -f $where ]]; then
+    if (
+      case $kind in
+        gsettings)
+          dk_run gsettings set "$where" "$key" "$value" ;;
+        dconf)
           if [[ -z $value ]]; then
-            jq 'del(.theme)' "$where" | dk_write "$where"
+            dk_run dconf reset "$where/$key"
           else
-            jq --arg theme "$value" '.theme = $theme' "$where" | dk_write "$where"
-          fi
-        fi ;;
-    esac
-    echo "  restored $kind $key"
-  done < <(tac "$DK_PRIOR")
-  dk_run mv "$DK_PRIOR" "$DK_PRIOR.restored"
+            dk_run dconf write "$where/$key" "$value"
+          fi ;;
+        herdr)
+          [[ -f $where ]] || exit 0
+          if [[ -n $value ]]; then
+            dk_herdr_set_name "$where" "$value"
+          else
+            dk_rewrite "$where" awk '
+              /^\[/ { in_theme = ($0 ~ /^\[theme\]/) }
+              in_theme && /^name[[:space:]]*=/ { next }
+              { print }' "$where"
+            dk_run herdr server reload-config > /dev/null 2>&1 || true
+          fi ;;
+        claude)
+          [[ -f $where ]] && command -v jq > /dev/null || exit 0
+          if [[ -z $value ]]; then
+            dk_rewrite "$where" jq 'del(.theme)' "$where"
+          else
+            dk_rewrite "$where" jq --arg theme "$value" '.theme = $theme' "$where"
+          fi ;;
+      esac
+    ); then
+      echo "  restored $kind $key"
+    else
+      echo "  could not restore $kind $where $key (original: $value)" >&2
+      failed=1
+    fi
+  done < "$DK_PRIOR"
+  if (( failed )); then
+    echo "  Some settings were not restored; prior.tsv is kept so you can retry." >&2
+  else
+    dk_run mv "$DK_PRIOR" "$DK_PRIOR.restored"
+  fi
 else
   echo "  nothing recorded"
 fi
@@ -53,9 +78,12 @@ for link in "$HOME"/.local/bin/*; do
     echo "  removed $(basename "$link")"
   fi
 done
-for palette in "${XDG_DATA_HOME:-$HOME/.local/share}"/org.gnome.Ptyxis/palettes/dk-*.palette; do
-  [[ -f $palette ]] && dk_run rm "$palette"
-done
+while read -r id; do
+  palette="${XDG_DATA_HOME:-$HOME/.local/share}/org.gnome.Ptyxis/palettes/dk-$id.palette"
+  if [[ -f $palette ]]; then
+    dk_run rm "$palette"
+  fi
+done < <(dk_theme_ids)
 dk_run rm -rf "$DK_STATE/wallpapers" "$DK_STATE/rofi.rasi" "$DK_STATE/current"
 
 echo

@@ -45,7 +45,10 @@ apply_herdr() {
   config=$(dk_herdr_config)
   [[ -f $config ]] || return 0
   dk_backup_once "$config" herdr-config.toml
-  dk_remember herdr "$config" name "$(sed -n -E '/^\[theme\]/,/^\[/ s/^name[[:space:]]*=[[:space:]]*"([^"]*)".*/\1/p' "$config" | head -1)"
+  local old
+  old=$(sed -n -E '/^\[theme\]/,/^\[/ s/^name[[:space:]]*=[[:space:]]*"([^"]*)".*/\1/p' "$config" | head -1)
+  [[ $old =~ ^[a-z0-9-]{1,40}$ ]] || old=""
+  dk_remember herdr "$config" name "$old"
   dk_herdr_set_name "$config" "$(dk_get "$t" herdr)"
 }
 
@@ -58,19 +61,20 @@ dk_herdr_set_name() {
 
   # Set name = "..." inside the [theme] table only: replace it if present,
   # else add it under the header. Without a [theme] table, append one.
-  if grep -q '^\[theme\]' "$config"; then
-    awk -v name="$name" '
-      /^\[/ { in_theme = ($0 == "[theme]") }
+  if grep -qE '^\[theme\][[:space:]]*(#.*)?$' "$config"; then
+    DK_NAME="$name" dk_rewrite "$config" awk '
+      BEGIN { name = ENVIRON["DK_NAME"] }
+      /^\[/ { in_theme = ($0 ~ /^\[theme\][[:space:]]*(#.*)?$/) }
       in_theme && /^name[[:space:]]*=/ { has_name = 1 }
       { lines[NR] = $0; theme[NR] = in_theme }
       END {
         for (i = 1; i <= NR; i++) {
           if (theme[i] && lines[i] ~ /^name[[:space:]]*=/) { print "name = \"" name "\""; continue }
           print lines[i]
-          if (!has_name && lines[i] == "[theme]") print "name = \"" name "\""
+          if (!has_name && lines[i] ~ /^\[theme\]/) print "name = \"" name "\""
         }
       }
-    ' "$config" | dk_write "$config"
+    ' "$config"
   else
     { cat "$config"; printf '\n[theme]\nname = "%s"\n' "$name"; } | dk_write "$config"
   fi
@@ -83,9 +87,16 @@ apply_claude() {
   settings="$HOME/.claude/settings.json"
   [[ -f $settings ]] || return 0
   value=$(dk_get "$t" claude)
+  jq -e . "$settings" > /dev/null 2>&1 || {
+    echo "  skip Claude Code: $settings isn't plain JSON" >&2
+    return 0
+  }
   dk_backup_once "$settings" claude-settings.json
-  dk_remember claude "$settings" theme "$(jq -r '.theme // ""' "$settings")"
-  jq --arg theme "$value" '.theme = $theme' "$settings" | dk_write "$settings"
+  local old
+  old=$(jq -r 'if (.theme | type) == "string" then .theme else "" end' "$settings")
+  [[ $old =~ ^[a-z0-9-]{0,40}$ ]] || old=""
+  dk_remember claude "$settings" theme "$old"
+  dk_rewrite "$settings" jq --arg theme "$value" '.theme = $theme' "$settings"
 }
 
 # Tactile tiling grid colours. Gaps and grids live in defaults/tactile.dconf. dconf is used
@@ -120,11 +131,25 @@ apply_wallpaper() {
     dk_generate_wallpaper "$t" | dk_write "$image"
   fi
 
-  uri="file://$image"
+  uri="file://$(dk_uri_path "$image")"
   dk_gset org.gnome.desktop.background picture-uri "$uri"
   dk_gset org.gnome.desktop.background picture-uri-dark "$uri"
   dk_gset org.gnome.desktop.background picture-options "zoom"
   dk_gset org.gnome.desktop.screensaver picture-uri "$uri"
+}
+
+# Percent-encode a path for a file:// URI.
+dk_uri_path() {
+  local path=$1 out="" c i
+  for (( i = 0; i < ${#path}; i++ )); do
+    c=${path:i:1}
+    if [[ $c =~ [A-Za-z0-9/._~-] ]]; then
+      out+=$c
+    else
+      out+=$(printf '%%%02X' "'$c")
+    fi
+  done
+  echo "$out"
 }
 
 # A soft gradient with two blurred glows in the theme's accent colours.

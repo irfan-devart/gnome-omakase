@@ -47,9 +47,15 @@ Recommended packages: `sudo apt install rofi jq`. Without them the launcher and 
 
 Your shortcuts, commands, palettes and every setting the kit changed go back to their earlier values. Your own shortcuts are left alone. Extensions stay installed.
 
+Two things to know:
+- A setting goes back to its value from before install, even if you changed it yourself since (say, the accent colour or wallpaper).
+- Run uninstall from the same folder you installed from. If you move the repo first, its commands in `~/.local/bin` are left behind as broken links.
+
 ## Safety
 
 - No sudo, no `curl | bash`, no third-party apt repositories. Everything stays in your home folder.
+- Config edits are atomic and never write an empty file: if `jq` or `awk` fails, the file is left as it was. Symlinked dotfiles are written through, not replaced, and file modes are kept.
+- Settings that don't exist on your GNOME version are skipped, not half-applied.
 - Every setting's original value is recorded before the first change (`~/.local/state/desktop-kit/prior.tsv`), and a full `dconf dump` is taken at install.
 - Theme files are validated before anything is applied: colours must be `#rrggbb`, names and ids follow strict patterns, so a theme can't inject commands.
 - `--dry-run` on install, uninstall and `theme-set` prints every change without making it.
@@ -72,4 +78,4 @@ test/run.sh
 
 ## Credits
 
-Inspired by [Omarchy](https://omarchy.org) and [Omabuntu](https://github.com/omakasui/omabuntu). The Gruvbox and Tokyo Night palettes come from Omabuntu (MIT). Licence: MIT.
+Inspired by [Omarchy](https://omarchy.org) and [Omabuntu](https://github.com/omakasui/omabuntu). The Gruvbox and Tokyo Night palettes are taken from Omabuntu's theme files (MIT per its README); the original colour schemes are [Gruvbox](https://github.com/morhetz/gruvbox) by Pavel Pertsev and [Tokyo Night](https://github.com/enkia/tokyo-night-vscode-theme) by enkia, both MIT. Licence: MIT.

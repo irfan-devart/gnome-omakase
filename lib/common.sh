@@ -26,6 +26,7 @@ dk_run() {
 }
 
 # Write stdin to a file atomically, or print the target in dry-run mode.
+# Refuses empty input, and writes through symlinks so dotfile links survive.
 dk_write() {
   local target=$1
   if [[ $DK_DRY_RUN == "1" ]]; then
@@ -33,11 +34,26 @@ dk_write() {
     cat > /dev/null
     return
   fi
+  [[ -L $target ]] && target=$(readlink -f "$target")
   mkdir -p "$(dirname "$target")"
   local tmp
   tmp=$(mktemp "$target.XXXXXX")
   cat > "$tmp"
+  if [[ ! -s $tmp ]]; then
+    rm -f "$tmp"
+    dk_die "refusing to write an empty $target"
+  fi
+  [[ -f $target ]] && chmod --reference="$target" "$tmp"
   mv "$tmp" "$target"
+}
+
+# Run a command that prints a file's new content, and write it only if the
+# command succeeded. A failed jq or awk never empties the target.
+dk_rewrite() {
+  local target=$1 out
+  shift
+  out=$("$@") || dk_die "could not update $target (left unchanged)"
+  printf '%s\n' "$out" | dk_write "$target"
 }
 
 # Copy a file into the backup folder once, before the first change we make to it.
@@ -64,9 +80,15 @@ dk_remember() {
 }
 
 # gsettings set, remembering the original value first.
+# Keys that don't exist on this GNOME version (e.g. accent-color before 47)
+# are skipped, so nothing is half-applied or recorded empty.
 dk_gset() {
-  local schema=$1 key=$2 value=$3
-  dk_remember gsettings "$schema" "$key" "$(gsettings get "$schema" "$key")"
+  local schema=$1 key=$2 value=$3 old
+  old=$(gsettings get "$schema" "$key" 2> /dev/null) || {
+    echo "  skip $key: not available on this GNOME" >&2
+    return 0
+  }
+  dk_remember gsettings "$schema" "$key" "$old"
   dk_run gsettings set "$schema" "$key" "$value"
 }
 
