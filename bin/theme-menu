@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Pick a theme from a rofi menu and apply it. A second press closes the menu.
+
+set -euo pipefail
+
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+
+pkill -x rofi && exit 0
+
+current=$(cat "$DK_STATE/current" 2> /dev/null || true)
+theme_args=()
+[[ -f $DK_STATE/rofi.rasi ]] && theme_args=(-theme "$DK_STATE/rofi.rasi")
+
+choice=$(dk_theme_ids | rofi -x11 -normal-window -dpi 1 -dmenu -i -p "theme" \
+  -select "$current" "${theme_args[@]}") || exit 0
+
+"$DK_ROOT/bin/theme-set" "$choice"

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Toggle the rofi app launcher: a second press closes an open one.
+# -x11: rofi's Wayland backend needs layer-shell, which GNOME lacks.
+# -normal-window: GNOME only gives keyboard focus to normal XWayland windows.
+# -dpi 1: take DPI from the X server (Xft.dpi), so it follows display scaling.
+
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+
+pkill -x rofi && exit 0
+
+theme_args=()
+[[ -f $DK_STATE/rofi.rasi ]] && theme_args=(-theme "$DK_STATE/rofi.rasi")
+
+exec rofi -x11 -normal-window -dpi 1 -show drun -show-icons "${theme_args[@]}"

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Apply a theme across GNOME, Ptyxis, Herdr, Claude Code and rofi.
+# Usage: theme-set [--dry-run] <theme-id>
+
+set -euo pipefail
+
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+source "$DK_ROOT/lib/apply.sh"
+
+if [[ ${1:-} == "--dry-run" ]]; then
+  DK_DRY_RUN=1
+  shift
+fi
+
+[[ -n ${1:-} ]] || dk_die "usage: theme-set [--dry-run] <theme-id>"
+
+id=$1
+theme="$(dk_theme_dir "$id")/theme.toml"
+
+# Validate every key before touching anything, so a bad theme changes nothing.
+for key in name mode gnome_accent herdr claude accent cursor foreground background \
+  selection_foreground selection_background color{0..15}; do
+  dk_get "$theme" "$key" > /dev/null
+done
+
+apply_gnome "$theme"
+apply_ptyxis "$theme" "$id"
+apply_herdr "$theme"
+apply_claude "$theme"
+apply_rofi "$theme"
+
+if [[ $DK_DRY_RUN != "1" ]]; then
+  mkdir -p "$DK_STATE"
+  echo "$id" > "$DK_STATE/current"
+fi
+echo "Theme: $(dk_get "$theme" name)"
