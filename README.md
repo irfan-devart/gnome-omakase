@@ -6,6 +6,10 @@ I like what [Omarchy](https://omarchy.org) gets right: keyboard first, one theme
 
 Tested on Ubuntu 26.04, GNOME 50.
 
+![The 12 themes as they land in Files: window, sidebar, folders and accent](docs/themes.png)
+
+Twelve themes. One key switches the terminal, GNOME apps, folder colours, wallpaper and tiling gaps together.
+
 ## Keys
 
 | Keys | Does |
