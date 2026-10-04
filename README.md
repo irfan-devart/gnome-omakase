@@ -16,6 +16,14 @@ Twelve themes. One key switches the terminal, GNOME apps, folder colours, wallpa
 |---|---|
 | ![App launcher](docs/launcher.png) | ![Keyboard shortcuts](docs/keys.png) |
 
+## Wallpapers
+
+![The wallpaper that comes with each theme](docs/wallpapers.jpg)
+
+Every theme brings its own wallpaper, and they look beautiful on a big screen: Hokusai's Great Wave for Kanagawa, Tokyo at night from the space station, a sunset from orbit for Matte Black, Whistler's nocturne for Everforest, Monet's fog and morning haze for the soft light themes. All public domain or CC0, so they're free to share. Credits in [themes/WALLPAPERS.md](themes/WALLPAPERS.md).
+
+I run Paper every day. It started with my Kindle: warm paper, ink-black text, nothing competing for attention. It's the one I can look at for hours.
+
 ## Keys
 
 | Keys | Does |
