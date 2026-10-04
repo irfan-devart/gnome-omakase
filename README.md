@@ -52,7 +52,7 @@ Every setting goes back to what it was before install. Your own shortcuts are le
 
 ## Make it yours
 
-Add a theme in `~/.config/gnome-omakase/themes/<id>/theme.toml` (copy one from `themes/`); put a `background.svg`, `.jpg` or `.png` next to it to give it its own wallpaper. To use your own wallpaper with any theme, drop it in `~/.config/gnome-omakase/backgrounds/<id>/`.
+Add a theme in `~/.config/gnome-omakase/themes/<id>/theme.toml` (copy one from `themes/`); put a `background.svg`, `.jpg` or `.png` next to it to give it its own wallpaper. To use your own wallpaper with any theme, drop it in `~/.config/gnome-omakase/backgrounds/<id>/`. Optional keys reach past the terminal: `app_background`, `app_view` and `app_sidebar` tint GTK 4 apps like Files and Settings (restart them to see it), and `yaru` picks Ubuntu's folder icon colour (Paper uses both).
 
 ## Limits
 

@@ -280,3 +280,70 @@ element-text { text-color: inherit; }
 element-icon { size: 1.2em; }
 EOF
 }
+
+# GTK 4 apps (Files, Settings, Text Editor) take the theme's surface colours
+# from a block we own in gtk.css, and Yaru's folder icons follow the theme's
+# `yaru` variant. Both are optional: a theme without app_background gets the
+# block removed, and one without yaru gets the original icon theme back.
+# Open apps pick the colours up when restarted.
+apply_apps() {
+  local t=$1 css block="" iface=org.gnome.desktop.interface key value
+  css="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0/gtk.css"
+  if om_has "$t" app_background; then
+    local bg view side fg
+    bg=$(om_get "$t" app_background)
+    view=$(om_get "$t" app_view)
+    side=$(om_get "$t" app_sidebar)
+    fg=$(om_get "$t" foreground)
+    block="/* gnome-omakase start: written by theme-set, changes here are overwritten */
+@define-color window_bg_color $bg;
+@define-color view_bg_color $view;
+@define-color headerbar_bg_color $bg;
+@define-color sidebar_bg_color $side;
+@define-color popover_bg_color $view;
+@define-color dialog_bg_color $view;
+:root {
+  --window-bg-color: $bg;
+  --window-fg-color: $fg;
+  --view-bg-color: $view;
+  --view-fg-color: $fg;
+  --headerbar-bg-color: $bg;
+  --headerbar-backdrop-color: $bg;
+  --sidebar-bg-color: $side;
+  --sidebar-backdrop-color: $side;
+  --secondary-sidebar-bg-color: $side;
+  --popover-bg-color: $view;
+  --dialog-bg-color: $view;
+}
+/* gnome-omakase end */"
+  fi
+  om_css_block "$css" "$block"
+
+  for key in gtk-theme icon-theme; do
+    if om_has "$t" yaru; then
+      value="Yaru-$(om_get "$t" yaru)"
+      [[ $(om_get "$t" mode) == "dark" ]] && value+="-dark"
+      [[ -d /usr/share/icons/$value || -d /usr/share/themes/$value ]] || continue
+      om_gset "$iface" "$key" "$value"
+    else
+      value=$(om_prior gsettings "$iface" "$key")
+      [[ -n $value ]] && om_run gsettings set "$iface" "$key" "$value"
+    fi
+  done
+  return 0
+}
+
+# Replace our marked block in a CSS file with new content (empty removes it).
+# Anything else in the file is kept; a file left empty is deleted.
+om_css_block() {
+  local file=$1 block=$2 rest=""
+  if [[ -f $file ]]; then
+    om_backup_once "$file" "$(basename "$(dirname "$file")")-gtk.css"
+    rest=$(sed '\#^/\* gnome-omakase start#,\#^/\* gnome-omakase end \*/#d' "$file")
+  fi
+  if [[ -z $block && -z ${rest//[[:space:]]/} ]]; then
+    [[ -f $file ]] && om_run rm "$file"
+    return 0
+  fi
+  printf '%s\n%s\n' "$rest" "$block" | sed '/./,$!d' | om_write "$file"
+}

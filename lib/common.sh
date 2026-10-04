@@ -8,6 +8,7 @@ OM_BACKUPS="$OM_STATE/backups"
 OM_DRY_RUN="${OM_DRY_RUN:-0}"
 
 GNOME_ACCENTS="blue teal green yellow orange red pink purple slate"
+YARU_VARIANTS="blue magenta olive prussiangreen purple red sage wartybrown yellow"
 
 om_die() {
   echo "gnome-omakase: $*" >&2
@@ -133,10 +134,25 @@ om_get() {
       [[ $value == "light" || $value == "dark" ]] || om_die "$file: mode must be light or dark" ;;
     gnome_accent)
       [[ " $GNOME_ACCENTS " == *" $value "* ]] || om_die "$file: gnome_accent must be one of: $GNOME_ACCENTS" ;;
+    yaru)
+      [[ " $YARU_VARIANTS " == *" $value "* ]] || om_die "$file: yaru must be one of: $YARU_VARIANTS" ;;
     herdr | claude)
       [[ $value =~ ^[a-z0-9-]{1,40}$ ]] || om_die "$file: bad $key value" ;;
     *)
       [[ $value =~ ^#[0-9a-fA-F]{6}$ ]] || om_die "$file: $key must be a #rrggbb colour" ;;
   esac
   echo "$value"
+}
+
+# True when a theme sets an optional key.
+om_has() {
+  grep -qE "^$2[[:space:]]*=" "$1"
+}
+
+# The original value recorded in prior.tsv, or nothing.
+om_prior() {
+  local kind=$1 where=$2 key=$3
+  [[ -f $OM_PRIOR ]] || return 0
+  awk -F'\t' -v k="$kind" -v w="$where" -v n="$key" \
+    '$1 == k && $2 == w && $3 == n { print $4; exit }' "$OM_PRIOR"
 }

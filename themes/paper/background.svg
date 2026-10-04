@@ -5,8 +5,8 @@
       <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0.11  0 0 0 0 0.11  0 0 0 0 0.11  0 0 0 0.045 0"/>
     </filter>
     <radialGradient id="light" cx="0.5" cy="0.42" r="0.75">
-      <stop offset="0" stop-color="#f6f4ef"/>
-      <stop offset="1" stop-color="#e9e6df"/>
+      <stop offset="0" stop-color="#f2ecdd"/>
+      <stop offset="1" stop-color="#e4ddcc"/>
     </radialGradient>
   </defs>
   <rect width="3200" height="2000" fill="url(#light)"/>

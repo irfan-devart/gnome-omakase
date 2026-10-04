@@ -92,6 +92,7 @@ if [[ -f $ghostty_config ]] && grep -q '^# gnome-omakase start' "$ghostty_config
   echo "  removed Ghostty settings"
 fi
 om_run rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/ghostty/omakase-theme"
+om_css_block "${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0/gtk.css" ""
 ptyxis_override="${XDG_DATA_HOME:-$HOME/.local/share}/applications/org.gnome.Ptyxis.desktop"
 if [[ -f $ptyxis_override ]] && grep -q '^# gnome-omakase' "$ptyxis_override"; then
   om_run rm "$ptyxis_override"

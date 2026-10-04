@@ -1,16 +1,22 @@
-# Paper: e-ink reader calm. Neutral paper, ink-black text, muted ink colours.
+# Paper: e-ink reader calm. Warm paper, ink-black text, muted ink colours.
 name = "Paper"
 mode = "light"
 gnome_accent = "slate"
 herdr = "terminal"
 claude = "light-daltonized"
+yaru = "wartybrown"
 
 accent = "#4a4a4a"
 cursor = "#1c1c1c"
 foreground = "#1c1c1c"
-background = "#f2f0eb"
+background = "#eee8d8"
 selection_foreground = "#1c1c1c"
-selection_background = "#d9d6ce"
+selection_background = "#dcd4c2"
+
+# GTK 4 apps: header and window, content, sidebar.
+app_background = "#e8e1cf"
+app_view = "#eee8d8"
+app_sidebar = "#e3dbc8"
 
 color0 = "#3a3a3a"
 color1 = "#8c3a3a"

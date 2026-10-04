@@ -13,8 +13,13 @@ theme_args=()
 [[ -f $OM_STATE/rofi.rasi ]] && theme_args=(-theme "$OM_STATE/rofi.rasi")
 
 mkdir -p "$OM_STATE"
-choice=$(om_theme_ids | rofi -x11 -normal-window -dpi 1 -dmenu -i -p "theme" \
-  -select "$current" "${theme_args[@]}" 2>> "$OM_STATE/menu.log") || true
+# Mark the active theme so it can be seen, not guessed; the mark is stripped
+# before theme-set sees the pick.
+mark="  (current)"
+choice=$(om_theme_ids | sed "s/^${current}\$/&${mark}/" |
+  rofi -x11 -normal-window -dpi 1 -dmenu -i -p "theme" \
+  -select "$current$mark" "${theme_args[@]}" 2>> "$OM_STATE/menu.log") || true
+choice=${choice%"$mark"}
 # rofi under XWayland can exit 1 even after a pick, so trust the output, not
 # the exit code. Esc prints nothing; theme-set validates whatever comes back.
 [[ -n $choice ]] || exit 0
