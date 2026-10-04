@@ -11,6 +11,11 @@ foreground = "#000000"
 background = "#ffffff"
 selection_foreground = "#ffffff"
 selection_background = "#1a1a1a"
+
+# GTK 4 apps: header and window, content, sidebar.
+app_background = "#f4f4f4"
+app_view = "#ffffff"
+app_sidebar = "#e9e9e9"
 color0 = "#ffffff"
 color1 = "#2a2a2a"
 color2 = "#3a3a3a"

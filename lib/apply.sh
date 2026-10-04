@@ -322,6 +322,7 @@ apply_apps() {
   for key in gtk-theme icon-theme; do
     if om_has "$t" yaru; then
       value="Yaru-$(om_get "$t" yaru)"
+      [[ $value == "Yaru-orange" ]] && value="Yaru" # Ubuntu's default is orange
       [[ $(om_get "$t" mode) == "dark" ]] && value+="-dark"
       [[ -d /usr/share/icons/$value || -d /usr/share/themes/$value ]] || continue
       om_gset "$iface" "$key" "$value"

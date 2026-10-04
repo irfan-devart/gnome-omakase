@@ -8,7 +8,7 @@ OM_BACKUPS="$OM_STATE/backups"
 OM_DRY_RUN="${OM_DRY_RUN:-0}"
 
 GNOME_ACCENTS="blue teal green yellow orange red pink purple slate"
-YARU_VARIANTS="blue magenta olive prussiangreen purple red sage wartybrown yellow"
+YARU_VARIANTS="orange blue magenta olive prussiangreen purple red sage wartybrown yellow"
 
 om_die() {
   echo "gnome-omakase: $*" >&2

@@ -4,6 +4,7 @@ mode = "dark"
 gnome_accent = "green"
 herdr = "gruvbox"
 claude = "dark"
+yaru = "olive"
 
 accent = "#7daea3"
 
@@ -12,6 +13,11 @@ foreground = "#d4be98"
 background = "#282828"
 selection_foreground = "#ebdbb2"
 selection_background = "#d65d0e"
+
+# GTK 4 apps: header and window, content, sidebar.
+app_background = "#31302e"
+app_view = "#282828"
+app_sidebar = "#373632"
 
 color0 = "#3c3836"
 color1 = "#ea6962"
