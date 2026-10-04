@@ -10,6 +10,12 @@ Tested on Ubuntu 26.04, GNOME 50.
 
 Twelve themes. One key switches the terminal, GNOME apps, folder colours, wallpaper and tiling gaps together.
 
+![Borderless Ghostty running Herdr, Tokyo Night](docs/terminal.png)
+
+| `Super+Space` launcher | `Super+K` shortcuts |
+|---|---|
+| ![App launcher](docs/launcher.png) | ![Keyboard shortcuts](docs/keys.png) |
+
 ## Keys
 
 | Keys | Does |
