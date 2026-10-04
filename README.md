@@ -65,4 +65,4 @@ GNOME doesn't auto-tile like Hyprland: Tactile places windows, Focus changer mov
 
 ## Credits
 
-[Omarchy](https://omarchy.org) for the idea, [Omabuntu](https://github.com/omakasui/omabuntu) for the Ubuntu groundwork and the theme palettes (Catppuccin, Tokyo Night, Kanagawa, Nord, Everforest, Rosé Pine, Gruvbox and others, each MIT by their authors). MIT licence.
+[Omarchy](https://omarchy.org) for the idea, [Omabuntu](https://github.com/omakasui/omabuntu) for the Ubuntu groundwork and the theme palettes (Catppuccin, Tokyo Night, Kanagawa, Nord, Everforest, Rosé Pine, Gruvbox and others, each MIT by their authors). Wallpapers are public domain or CC0 paintings and NASA photos; see [themes/WALLPAPERS.md](themes/WALLPAPERS.md). MIT licence.
