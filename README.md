@@ -14,6 +14,7 @@ Twelve themes. One key switches the terminal, GNOME apps, folder colours, wallpa
 
 | Keys | Does |
 |---|---|
+| `Super+K` | Show these shortcuts (type to filter) |
 | `Super+Space` | Launch apps |
 | `Shift+Ctrl+Super+Space` | Switch theme |
 | `Super+Return` / `Shift+Super+B` / `Shift+Super+F` | Terminal (borderless Ghostty if installed) / browser / files |

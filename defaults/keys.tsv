@@ -1,0 +1,21 @@
+# Shown by keys-menu (Super+K). Keys, a tab, then what they do.
+Super+K	This list (type to filter)
+Super+Space	Launch apps
+Shift+Ctrl+Super+Space	Switch theme
+Super+Return	Terminal
+Shift+Super+B	Browser
+Shift+Super+F	Files
+Super+W	Close window
+Super+T, then two tiles	Tile the window to the grid
+Ctrl+Super+Arrow	Focus the window on that side
+Super+Arrow	Snap, maximize or restore
+Super+Alt+1-4	Go to workspace
+Shift+Super+Alt+1-4	Move window to workspace
+Super+Tab	Switch apps
+Super+H	Hide window
+Super+L	Lock screen
+Super+V	Notifications and calendar
+Super+A	All apps
+Super	Overview
+Print	Screenshot
+Shift+Super+Space	Switch keyboard layout

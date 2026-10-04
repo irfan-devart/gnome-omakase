@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Show the keyboard shortcuts in a rofi list. Type to filter; Esc or a
+# second press closes it. Read-only: picking a row does nothing.
+
+set -euo pipefail
+
+source "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+
+pkill -x rofi && exit 0
+
+theme_args=()
+[[ -f $OM_STATE/rofi.rasi ]] && theme_args=(-theme "$OM_STATE/rofi.rasi")
+
+mkdir -p "$OM_STATE"
+grep -v '^#' "$OM_ROOT/defaults/keys.tsv" |
+  awk -F'\t' 'NF == 2 { printf "%-26s %s\n", $1, $2 }' |
+  rofi -x11 -normal-window -dpi 1 -dmenu -i -p "keys" -no-custom \
+    -theme-str 'window { width: 50%; } listview { lines: 14; } element-text { font: "Monospace 11"; }' \
+    "${theme_args[@]}" > /dev/null 2>> "$OM_STATE/menu.log" || true

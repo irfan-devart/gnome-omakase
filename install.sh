@@ -129,6 +129,7 @@ echo "== Shortcuts"
 bin="$HOME/.local/bin"
 om_kb_add launcher "Launcher" "$bin/launcher-toggle" "<Super>space"
 om_kb_add theme-menu "Theme menu" "$bin/theme-menu" "<Shift><Control><Super>space"
+om_kb_add keys "Keyboard shortcuts" "$bin/keys-menu" "<Super>k"
 # Ghostty first: it's the borderless one. The others open a new window.
 if command -v ghostty > /dev/null; then
   om_kb_add terminal "Terminal" "ghostty" "<Super>Return"
