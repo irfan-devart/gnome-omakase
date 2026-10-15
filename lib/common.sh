@@ -90,13 +90,17 @@ om_gset() {
     return 0
   }
   om_remember gsettings "$schema" "$key" "$old"
+  # Unchanged keys are left alone: every set makes open apps and the Shell restyle.
+  [[ $old == "$value" || $old == "'$value'" ]] && return 0
   om_run gsettings set "$schema" "$key" "$value"
 }
 
 # dconf write, remembering the original value (empty means unset) first.
 om_dset() {
-  local path=$1 value=$2
-  om_remember dconf "$(dirname "$path")" "$(basename "$path")" "$(dconf read "$path")"
+  local path=$1 value=$2 old
+  old=$(dconf read "$path")
+  om_remember dconf "$(dirname "$path")" "$(basename "$path")" "$old"
+  [[ $old == "$value" ]] && return 0
   om_run dconf write "$path" "$value"
 }
 

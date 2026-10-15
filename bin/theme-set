@@ -16,6 +16,15 @@ fi
 [[ -n ${1:-} ]] || om_die "usage: theme-set [--dry-run] <theme-id>"
 
 id=$1
+
+# One switch at a time. Overlapping switches (a key pressed several times) each re-theme
+# every open app at once, and that froze GNOME Shell during a screen share (15-10-2026).
+if [[ $OM_DRY_RUN != "1" ]]; then
+  mkdir -p "$OM_STATE"
+  exec 9> "$OM_STATE/theme-set.lock"
+  flock -w 60 9 || om_die "another theme switch is still running"
+fi
+
 theme="$(om_theme_dir "$id")/theme.toml"
 
 # Validate every key before touching anything, so a bad theme changes nothing.

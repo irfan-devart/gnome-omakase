@@ -116,6 +116,11 @@ om_herdr_custom() {
       echo "selection_bg = \"$(om_get "$t" selection_background)\""
       echo "red = \"$(om_get "$t" color1)\""
       echo "green = \"$(om_get "$t" color2)\""
+      # Optional: Herdr's muted text and surfaces, otherwise guessed from the palette.
+      local key
+      for key in subtext0 overlay1 overlay0 surface1 surface0; do
+        om_has "$t" "herdr_$key" && echo "$key = \"$(om_get "$t" "herdr_$key")\""
+      done
     fi
   } | om_write "$config"
 }
@@ -173,7 +178,10 @@ apply_claude() {
 # because Tactile's schema lives in the user's extension folder, not system-wide.
 apply_tactile() {
   local t=$1 accent fg r g b
-  gnome-extensions info tactile@lundal.io > /dev/null 2>&1 || return 0
+  # Look for the folder, not `gnome-extensions info`: that wakes the Shell's D-Bus
+  # service and took 2 to 4 seconds on every switch.
+  [[ -d ${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions/tactile@lundal.io ||
+    -d /usr/share/gnome-shell/extensions/tactile@lundal.io ]] || return 0
   accent=$(om_get "$t" accent)
   fg=$(om_get "$t" foreground)
   r=$((16#${accent:1:2})); g=$((16#${accent:3:2})); b=$((16#${accent:5:2}))
